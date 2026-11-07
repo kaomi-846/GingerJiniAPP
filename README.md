@@ -1,0 +1,2 @@
+# GingerJiniAPP
+生姜のキャラクターJiniちゃんをはぐくむアプリです
