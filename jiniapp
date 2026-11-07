@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生姜の妖精GingerJiniちゃんはぐくみアプリ </title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Zen Maru Gothic -->
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Zen Maru Gothic', sans-serif;
+            background: #fdf6ec;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        /* ぷっくり立体感・パステル調カスタムスタイル */
+        .cute-card {
+            background: #ffffff;
+            border: 3px solid #ffeacc;
+            box-shadow: 0 8px 20px rgba(235, 175, 110, 0.18), inset 0 -4px 0 rgba(255, 230, 190, 0.5);
+            border-radius: 24px;
+        }
+
+        .cute-button {
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 10px rgba(220, 140, 60, 0.15), inset 0 -3px 0 rgba(0,0,0,0.1);
+        }
+        .cute-button:active {
+            transform: scale(0.93) translateY(2px);
+            box-shadow: 0 2px 4px rgba(220, 140, 60, 0.1);
+        }
+
+        /* アニメーション */
+        @keyframes jini-bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        @keyframes happy-dance {
+            0%, 100% { transform: translateY(0) scale(1); }
+            20% { transform: translateY(-18px) rotate(-6deg) scale(1.05); }
+            40% { transform: translateY(0) rotate(0deg); }
+            60% { transform: translateY(-18px) rotate(6deg) scale(1.05); }
+            80% { transform: translateY(0) rotate(0deg); }
+        }
+
+        @keyframes float-up {
+            0% { transform: translateY(0px) scale(0.8); opacity: 1; }
+            100% { transform: translateY(-40px) scale(1.2); opacity: 0; }
+        }
+
+        .jini-idle {
+            animation: jini-bounce 3s ease-in-out infinite;
+        }
+
+        .jini-happy-anim {
+            animation: happy-dance 0.8s ease-in-out infinite;
+        }
+
+        /* 吹き出しの三角 */
+        .speech-bubble {
+            position: relative;
+            background: #ffffff;
+            border-radius: 24px;
+            border: 3px solid #ffd89b;
+            box-shadow: 0 6px 16px rgba(240, 170, 80, 0.15);
+        }
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -13px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 13px 11px 0;
+            border-style: solid;
+            border-color: #ffffff transparent;
+            display: block;
+            width: 0;
+        }
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -17px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 16px 13px 0;
+            border-style: solid;
+            border-color: #ffd89b transparent;
+            display: block;
+            width: 0;
+        }
+
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fff4e5; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #ffca85; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-0 sm:p-4 bg-amber-50">
+
+    <!-- アプリ本体（スマホ型フレーム） -->
+    <div class="w-full max-w-md bg-[#fffbf5] sm:rounded-[40px] shadow-2xl border-4 border-[#ffe3bc] overflow-hidden flex flex-col min-h-[820px] max-h-[96vh] relative">
+        
+        <!-- HEADER STATUS BAR -->
+        <header class="bg-gradient-to-b from-[#fff5e6] to-[#ffe8cc] p-3 border-b-3 border-[#ffd6a5] z-10 shadow-sm">
+            <!-- Top info bar: Clock, Coins, Shop button -->
+            <div class="flex justify-between items-center mb-2 text-xs font-bold text-amber-900">
+                <div class="flex items-center space-x-1 bg-white/90 px-3 py-1 rounded-full shadow-sm border border-amber-200">
+                    <i class="far fa-clock text-amber-500"></i>
+                    <span id="real-time">9:41 AM</span>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <div class="flex items-center space-x-1.5 bg-amber-300 text-amber-950 px-3.5 py-1 rounded-full shadow-sm border border-amber-400 font-extrabold text-xs">
+                        <span class="text-sm">🪙</span>
+                        <span id="coin-count" class="text-sm">1,250</span>
+                    </div>
+                    <button onclick="openModal('shop-modal')" class="bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold px-3 py-1 rounded-full shadow cute-button flex items-center gap-1 text-xs">
+                        <i class="fas fa-shopping-cart"></i> ショップ
+                    </button>
+                </div>
+            </div>
+
+            <!-- 4つのステータスメーター (おなか, きれい, ごきげん, なかよし) -->
+            <div class="grid grid-cols-2 gap-2 text-[11px] font-bold">
+                <!-- おなか -->
+                <div class="bg-white/90 p-1.5 px-2 rounded-2xl shadow-inner border border-amber-100">
+                    <div class="flex justify-between text-amber-900 mb-0.5">
+                        <span class="flex items-center gap-1"><i class="fas fa-utensils text-orange-400"></i>おなか</span>
+                        <span id="stat-hunger-num" class="text-orange-500">95%</span>
+                    </div>
+                    <div class="w-full bg-amber-100 h-2.5 rounded-full overflow-hidden p-0.5 border border-amber-200">
+                        <div id="stat-hunger-bar" class="bg-gradient-to-r from-amber-400 to-orange-400 h-full rounded-full transition-all duration-500" style="width: 95%;"></div>
+                    </div>
+                </div>
+
+                <!-- きれい -->
+                <div class="bg-white/90 p-1.5 px-2 rounded-2xl shadow-inner border border-amber-100">
+                    <div class="flex justify-between text-sky-900 mb-0.5">
+                        <span class="flex items-center gap-1"><i class="fas fa-tint text-sky-400"></i>きれい</span>
+                        <span id="stat-clean-num" class="text-sky-500">88%</span>
+                    </div>
+                    <div class="w-full bg-sky-100 h-2.5 rounded-full overflow-hidden p-0.5 border border-sky-200">
+                        <div id="stat-clean-bar" class="bg-gradient-to-r from-sky-300 to-sky-400 h-full rounded-full transition-all duration-500" style="width: 88%;"></div>
+                    </div>
+                </div>
+
+                <!-- ごきげん -->
+                <div class="bg-white/90 p-1.5 px-2 rounded-2xl shadow-inner border border-amber-100">
+                    <div class="flex justify-between text-emerald-900 mb-0.5">
+                        <span class="flex items-center gap-1"><i class="fas fa-smile text-emerald-400"></i>ごきげん</span>
+                        <span id="stat-happy-num" class="text-emerald-500">92%</span>
+                    </div>
+                    <div class="w-full bg-emerald-100 h-2.5 rounded-full overflow-hidden p-0.5 border border-emerald-200">
+                        <div id="stat-happy-bar" class="bg-gradient-to-r from-emerald-300 to-green-400 h-full rounded-full transition-all duration-500" style="width: 92%;"></div>
+                    </div>
+                </div>
+
+                <!-- なかよし -->
+                <div class="bg-white/90 p-1.5 px-2 rounded-2xl shadow-inner border border-amber-100">
+                    <div class="flex justify-between text-pink-900 mb-0.5">
+                        <span class="flex items-center gap-1"><i class="fas fa-heart text-pink-400"></i>なかよし</span>
+                        <span id="stat-love-num" class="text-pink-500">87%</span>
+                    </div>
+                    <div class="w-full bg-pink-100 h-2.5 rounded-full overflow-hidden p-0.5 border border-pink-200">
+                        <div id="stat-love-bar" class="bg-gradient-to-r from-pink-300 to-rose-400 h-full rounded-full transition-all duration-500" style="width: 87%;"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN ROOM AREA -->
+        <main class="flex-1 relative flex flex-col justify-between p-3 overflow-hidden bg-gradient-to-b from-[#fffef0] via-[#fff8e7] to-[#ffeed5]">
+            
+            <!-- Room Background Elements -->
+            <div class="absolute top-2 left-4 w-24 h-24 bg-sky-200/50 rounded-full border-4 border-white/80 overflow-hidden shadow-inner flex items-center justify-center -z-0">
+                <div class="w-full h-full bg-gradient-to-b from-sky-200 to-amber-100 relative">
+                    <div class="absolute top-2 left-2 text-yellow-300 text-lg opacity-80">☀️</div>
+                    <div class="absolute bottom-1 right-2 text-white text-xs font-bold opacity-70">☁️</div>
+                </div>
+            </div>
+
+            <div class="absolute top-16 left-3 text-2xl text-emerald-400/80 -z-0"><i class="fas fa-leaf"></i></div>
+
+            <div class="absolute top-12 right-2 flex flex-col items-end opacity-90 -z-0">
+                <div class="w-10 h-10 bg-amber-100 border-2 border-amber-300 rounded-lg p-1 shadow-sm mb-2 flex items-center justify-center">
+                    <span class="text-xs">🐣</span>
+                </div>
+                <div class="w-28 h-16 bg-amber-200/60 rounded-3xl border-2 border-amber-300/60 shadow-inner flex items-center justify-center relative">
+                    <div class="absolute -left-4 -bottom-1 bg-pink-300 border-2 border-pink-400 rounded-full px-2 py-0.5 text-[10px] font-black text-white shadow-md transform -rotate-12">
+                        🍬 Jin
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speech Bubble -->
+            <div class="w-full z-10 my-1 px-2">
+                <div class="speech-bubble p-2.5 text-center text-amber-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2">
+                    <span id="speech-icon" class="text-base">🎵</span>
+                    <span id="speech-text">今日はいい天気だね〜！いっしょにあそぼう♪</span>
+                </div>
+            </div>
+
+            <!-- Jini-chan Stage -->
+            <div class="relative w-full flex-1 flex flex-col items-center justify-center my-1">
+                <div class="absolute bottom-2 w-72 h-28 bg-emerald-100/80 rounded-[100%] border-4 border-emerald-200/90 shadow-inner -z-0 flex items-center justify-center">
+                    <div class="text-emerald-300/40 text-xs font-bold space-x-4">
+                        <span>🌸</span><span>🌼</span><span>🌸</span>
+                    </div>
+                </div>
+
+                <!-- Visitor Spot -->
+                <div id="visitor-container" class="absolute left-3 bottom-6 transition-all duration-500 transform translate-y-12 opacity-0 z-10 flex flex-col items-center cursor-pointer" onclick="interactVisitor()">
+                    <div id="visitor-bubble" class="bg-white px-2 py-1 rounded-xl text-[10px] font-bold text-amber-900 shadow border-2 border-amber-300 mb-1 animate-pulse">あそびにきたよ！</div>
+                    <div id="visitor-character" class="w-16 h-16 flex items-center justify-center text-4xl filter drop-shadow-md"></div>
+                </div>
+
+                <!-- JINI-CHAN CHARACTER -->
+                <div id="jini-wrapper" class="relative z-20 cursor-pointer jini-idle transition-transform duration-300" onclick="touchJini()">
+                    <div id="effect-overlay" class="absolute inset-0 pointer-events-none z-30 flex justify-center items-center"></div>
+
+                    <svg id="jini-svg" width="220" height="220" viewBox="0 0 200 200" class="filter drop-shadow-md">
+                        <defs>
+                            <linearGradient id="jiniBodyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" stop-color="#fff176" />
+                                <stop offset="100%" stop-color="#fbc02d" />
+                            </linearGradient>
+
+                            <pattern id="gingerPattern" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
+                                <line x1="0" y1="0" x2="0" y2="12" stroke="#e65100" stroke-width="2.5" opacity="0.35"/>
+                            </pattern>
+
+                            <pattern id="ginghamCheck" width="10" height="10" patternUnits="userSpaceOnUse">
+                                <rect width="10" height="10" fill="#b3e5fc"/>
+                                <rect width="5" height="10" fill="#4fc3f7" opacity="0.5"/>
+                                <rect width="10" height="5" fill="#4fc3f7" opacity="0.5"/>
+                            </pattern>
+                        </defs>
+
+                        <!-- LEGS & SHOES -->
+                        <g id="jini-feet">
+                            <ellipse cx="74" cy="172" rx="14" ry="10" fill="#ffffff" stroke="#212121" stroke-width="3.5"/>
+                            <line x1="77" y1="152" x2="74" y2="162" stroke="#212121" stroke-width="4" stroke-linecap="round"/>
+                            <ellipse cx="126" cy="172" rx="14" ry="10" fill="#ffffff" stroke="#212121" stroke-width="3.5"/>
+                            <line x1="123" y1="152" x2="126" y2="162" stroke="#212121" stroke-width="4" stroke-linecap="round"/>
+                        </g>
+
+                        <!-- GINGER BUNS -->
+                        <g id="bun-left">
+                            <circle cx="48" cy="62" r="27" fill="url(#jiniBodyGrad)" stroke="#212121" stroke-width="4"/>
+                            <circle cx="48" cy="62" r="27" fill="url(#gingerPattern)"/>
+                        </g>
+                        <g id="bun-right">
+                            <circle cx="152" cy="62" r="27" fill="url(#jiniBodyGrad)" stroke="#212121" stroke-width="4"/>
+                            <circle cx="152" cy="62" r="27" fill="url(#gingerPattern)"/>
+                        </g>
+
+                        <!-- BODY -->
+                        <circle cx="100" cy="105" r="55" fill="url(#jiniBodyGrad)" stroke="#212121" stroke-width="4.5"/>
+
+                        <!-- HANDS -->
+                        <g id="jini-hands">
+                            <path d="M 50 115 Q 35 110 35 120" fill="none" stroke="#212121" stroke-width="4" stroke-linecap="round"/>
+                            <circle cx="33" cy="122" r="10" fill="#ffffff" stroke="#212121" stroke-width="3.5"/>
+                            <path d="M 150 115 Q 165 110 165 120" fill="none" stroke="#212121" stroke-width="4" stroke-linecap="round"/>
+                            <circle cx="167" cy="122" r="10" fill="#ffffff" stroke="#212121" stroke-width="3.5"/>
+                        </g>
+
+                        <!-- FACE -->
+                        <g id="jini-face">
+                            <path id="eye-left" d="M 74 95 Q 83 83 92 95" fill="none" stroke="#212121" stroke-width="5" stroke-linecap="round"/>
+                            <path id="eye-right" d="M 108 95 Q 117 83 126 95" fill="none" stroke="#212121" stroke-width="5" stroke-linecap="round"/>
+                            <ellipse cx="70" cy="107" rx="10" ry="7" fill="#ff7043" opacity="0.75"/>
+                            <ellipse cx="130" cy="107" rx="10" ry="7" fill="#ff7043" opacity="0.75"/>
+                            <path id="mouth" d="M 86 112 Q 100 130 114 112 Z" fill="#e53935" stroke="#212121" stroke-width="3.5" stroke-linejoin="round"/>
+                        </g>
+
+                        <!-- BLUE RIBBON -->
+                        <g id="blue-check-ribbon" transform="translate(136, 68) rotate(-12)">
+                            <path d="M -4 0 C -22 -18 -32 8 -4 5 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="3"/>
+                            <path d="M 4 0 C 22 -18 32 8 4 5 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="3"/>
+                            <path d="M -2 4 L -10 20 L -2 15 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="2"/>
+                            <path d="M 2 4 L 10 20 L 2 15 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="2"/>
+                            <circle cx="0" cy="2" r="8.5" fill="#ffd54f" stroke="#212121" stroke-width="2.5"/>
+                            <circle cx="-3" cy="0" r="1.2" fill="#212121"/>
+                            <circle cx="3" cy="0" r="1.2" fill="#212121"/>
+                            <path d="M -3 3 Q 0 6 3 3" fill="none" stroke="#212121" stroke-width="1.5" stroke-linecap="round"/>
+                        </g>
+
+                        <!-- DYNAMIC ACCESSORY LAYER -->
+                        <g id="accessory-layer"></g>
+                    </svg>
+                </div>
+
+                <!-- Level Badge -->
+                <div class="absolute right-2 bottom-4 bg-white/95 border-3 border-pink-200 rounded-2xl p-2 shadow-md text-center flex flex-col items-center">
+                    <div class="text-[10px] font-black text-pink-500 flex items-center gap-1">
+                        <i class="fas fa-heart"></i> なかよし度
+                    </div>
+                    <div id="friend-level" class="text-base font-black text-amber-950">Lv.5</div>
+                    <div class="text-[9px] text-gray-500 font-bold" id="next-level-exp">あと 50 ⭐</div>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS GRID -->
+            <div class="grid grid-cols-3 gap-2.5 z-10 mt-1">
+                <button onclick="openModal('food-modal')" class="cute-card p-2 rounded-2xl flex flex-col items-center justify-center cute-button bg-gradient-to-b from-amber-50 to-orange-100 border-amber-200">
+                    <div class="w-10 h-10 rounded-full bg-orange-400 text-white flex items-center justify-center text-xl shadow-md mb-1">🍪</div>
+                    <span class="text-xs font-black text-amber-950">ごはん</span>
+                </button>
+                <button onclick="takeBath()" class="cute-card p-2 rounded-2xl flex flex-col items-center justify-center cute-button bg-gradient-to-b from-sky-50 to-blue-100 border-sky-200">
+                    <div class="w-10 h-10 rounded-full bg-sky-400 text-white flex items-center justify-center text-xl shadow-md mb-1">🛁</div>
+                    <span class="text-xs font-black text-sky-950">おふろ</span>
+                </button>
+                <button onclick="openModal('play-modal')" class="cute-card p-2 rounded-2xl flex flex-col items-center justify-center cute-button bg-gradient-to-b from-emerald-50 to-green-100 border-emerald-200">
+                    <div class="w-10 h-10 rounded-full bg-emerald-400 text-white flex items-center justify-center text-xl shadow-md mb-1">🎮</div>
+                    <span class="text-xs font-black text-emerald-950">あそぶ</span>
+                </button>
+                <button onclick="openModal('dress-modal')" class="cute-card p-2 rounded-2xl flex flex-col items-center justify-center cute-button bg-gradient-to-b from-pink-50 to-rose-100 border-pink-200">
+                    <div class="w-10 h-10 rounded-full bg-pink-400 text-white flex items-center justify-center text-xl shadow-md mb-1">🎀</div>
+                    <span class="text-xs font-black text-pink-950">きせかえ</span>
+                </button>
+                <button onclick="openModal('zukan-modal')" class="cute-card p-2 rounded-2xl flex flex-col items-center justify-center cute-button bg-gradient-to-b from-amber-50 to-yellow-100 border-amber-200">
+                    <div class="w-10 h-10 rounded-full bg-amber-400 text-white flex items-center justify-center text-xl shadow-md mb-1">📖</div>
+                    <span class="text-xs font-black text-amber-950">ずかん</span>
+                </button>
+                <button onclick="openModal('shop-modal')" class="cute-card p-2 rounded-2xl flex flex-col items-center justify-center cute-button bg-gradient-to-b from-yellow-50 to-amber-100 border-yellow-200">
+                    <div class="w-10 h-10 rounded-full bg-yellow-400 text-amber-950 flex items-center justify-center text-xl shadow-md mb-1">🏪</div>
+                    <span class="text-xs font-black text-amber-950">ショップ</span>
+                </button>
+            </div>
+
+            <!-- LOWER MISSION & EVENT BANNER -->
+            <div class="grid grid-cols-5 gap-2 mt-2.5 z-10">
+                <div class="col-span-3 bg-white/95 border-2 border-amber-200 rounded-2xl p-2 shadow-sm flex items-center justify-between text-xs">
+                    <div class="flex items-center space-x-2">
+                        <span class="text-lg">🚩</span>
+                        <div>
+                            <div class="font-black text-amber-950 text-[11px]">今日のミッション</div>
+                            <div class="text-[10px] text-amber-700" id="mission-desc">おなかを 90% 以上にしよう！</div>
+                        </div>
+                    </div>
+                    <button id="mission-claim-btn" onclick="claimMission()" class="bg-yellow-400 hover:bg-yellow-500 text-amber-950 font-black px-2.5 py-1 rounded-xl shadow text-[10px] cute-button">
+                        🪙 50
+                    </button>
+                </div>
+                <div class="col-span-2 bg-gradient-to-r from-pink-300 to-purple-300 border-2 border-pink-400 rounded-2xl p-1.5 shadow-sm flex items-center justify-between text-white text-[10px] font-bold">
+                    <div>
+                        <div class="text-yellow-200 font-black">⭐ イベント中！</div>
+                        <div class="text-[9px]">ハッピーキャンディフェス</div>
+                    </div>
+                    <span class="text-xs">✨</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="bg-[#fff4e5] py-2 text-center border-t-2 border-[#ffe0b2]">
+            <span class="text-xs font-black text-amber-900 flex items-center justify-center gap-1.5">
+                <i class="fas fa-heart text-pink-400"></i> Jiniちゃんと たのしい毎日を♪ <i class="fas fa-sparkles text-amber-500"></i>
+            </span>
+        </footer>
+    </div>
+
+
+    <!-- ==================== MODALS ==================== -->
+
+    <!-- 1. FOOD MODAL -->
+    <div id="food-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
+        <div class="bg-[#fffcf7] rounded-3xl p-5 w-full max-w-sm border-4 border-amber-300 shadow-2xl relative">
+            <button onclick="closeModal('food-modal')" class="absolute top-3 right-3 bg-rose-400 text-white w-8 h-8 rounded-full font-bold shadow hover:bg-rose-500">✕</button>
+            <div class="flex items-center space-x-2 mb-3">
+                <div class="w-8 h-8 rounded-full bg-amber-400 text-white flex items-center justify-center text-lg shadow">🍪</div>
+                <h3 class="font-black text-amber-950 text-base">生姜のごはんメニュー</h3>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5 max-h-80 overflow-y-auto p-1" id="food-list-container"></div>
+        </div>
+    </div>
+
+    <!-- 2. MINI-GAMES MODAL -->
+    <div id="play-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
+        <div class="bg-[#fffcf7] rounded-3xl p-5 w-full max-w-sm border-4 border-emerald-300 shadow-2xl relative">
+            <button onclick="closeModal('play-modal')" class="absolute top-3 right-3 bg-rose-400 text-white w-8 h-8 rounded-full font-bold shadow hover:bg-rose-500">✕</button>
+            
+            <div id="game-select-view">
+                <h3 class="font-black text-emerald-950 text-base mb-4 text-center">あそびをえらんでね</h3>
+                <div class="space-y-3">
+                    <button onclick="startCandyCatchGame()" class="w-full bg-gradient-to-r from-pink-400 to-rose-400 text-white p-3.5 rounded-2xl shadow-md text-left font-bold cute-button flex justify-between items-center">
+                        <div>
+                            <div class="text-sm font-black">🍬 お菓子キャッチ</div>
+                            <div class="text-[11px] opacity-90">降ってくるキャンディを拾おう！</div>
+                        </div>
+                        <i class="fas fa-play text-xs"></i>
+                    </button>
+
+                    <button onclick="startGingerWalkGame()" class="w-full bg-gradient-to-r from-emerald-400 to-green-500 text-white p-3.5 rounded-2xl shadow-md text-left font-bold cute-button flex justify-between items-center">
+                        <div>
+                            <div class="text-sm font-black">🌱 生姜畑のリフレッシュお散歩</div>
+                            <div class="text-[11px] opacity-90">立派な生姜を収穫してリフレッシュ！</div>
+                        </div>
+                        <i class="fas fa-play text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="mini-game-view" class="hidden flex flex-col items-center">
+                <div class="flex justify-between w-full font-black text-xs text-amber-950 mb-2">
+                    <span id="game-title-text">🍬 お菓子キャッチ</span>
+                    <span>スコア: <span id="game-score" class="text-pink-500">0</span></span>
+                    <span>残り: <span id="game-timer" class="text-emerald-600">15</span>s</span>
+                </div>
+                <canvas id="game-canvas" width="280" height="300" class="border-3 border-emerald-300 rounded-2xl bg-sky-50 shadow-inner"></canvas>
+                <div class="flex gap-4 mt-3">
+                    <button id="btn-left" class="bg-emerald-500 text-white px-6 py-2 rounded-xl font-black text-lg shadow cute-button">◀</button>
+                    <button id="btn-right" class="bg-emerald-500 text-white px-6 py-2 rounded-xl font-black text-lg shadow cute-button">▶</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. DRESS UP MODAL -->
+    <div id="dress-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
+        <div class="bg-[#fffcf7] rounded-3xl p-5 w-full max-w-sm border-4 border-pink-300 shadow-2xl relative">
+            <button onclick="closeModal('dress-modal')" class="absolute top-3 right-3 bg-rose-400 text-white w-8 h-8 rounded-full font-bold shadow hover:bg-rose-500">✕</button>
+            <h3 class="font-black text-pink-950 text-base mb-3">🎀 Jiniちゃんのきせかえ</h3>
+            <div class="grid grid-cols-2 gap-3 max-h-80 overflow-y-auto" id="accessory-list-container"></div>
+        </div>
+    </div>
+
+    <!-- 4. FRIENDS ENCYCLOPEDIA -->
+    <div id="zukan-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
+        <div class="bg-[#fffcf7] rounded-3xl p-5 w-full max-w-sm border-4 border-orange-300 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <button onclick="closeModal('zukan-modal')" class="absolute top-3 right-3 bg-rose-400 text-white w-8 h-8 rounded-full font-bold shadow hover:bg-rose-500">✕</button>
+            <h3 class="font-black text-amber-950 text-base mb-3 flex items-center gap-2">📖 なかま図鑑</h3>
+            <div class="flex-1 overflow-y-auto space-y-2.5 pr-1" id="friends-list-container"></div>
+        </div>
+    </div>
+
+    <!-- 5. SHOP MODAL -->
+    <div id="shop-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
+        <div class="bg-[#fffcf7] rounded-3xl p-5 w-full max-w-sm border-4 border-yellow-400 shadow-2xl relative max-h-[85vh] flex flex-col">
+            <button onclick="closeModal('shop-modal')" class="absolute top-3 right-3 bg-rose-400 text-white w-8 h-8 rounded-full font-bold shadow hover:bg-rose-500">✕</button>
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-black text-amber-950 text-base flex items-center gap-2">🏪 ショップ</h3>
+                <div class="bg-amber-300 px-3 py-1 rounded-full text-xs font-black text-amber-950">
+                    🪙 <span id="shop-coin-display">1,250</span>
+                </div>
+            </div>
+            <div class="flex border-b border-amber-200 mb-3">
+                <button onclick="switchShopTab('food')" id="tab-food" class="flex-1 py-1.5 font-black text-xs text-amber-950 border-b-2 border-amber-500">ごはん</button>
+                <button onclick="switchShopTab('acc')" id="tab-acc" class="flex-1 py-1.5 font-black text-xs text-gray-400">アクセサリー</button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="shop-items-container"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript App Engine -->
+    <script>
+        /* STATE DATA */
+        const gameState = {
+            coins: 1250,
+            hunger: 95,
+            clean: 88,
+            happy: 92,
+            love: 87,
+            level: 5,
+            exp: 50,
+            equippedAcc: 'blue_ribbon',
+            unlockedAccs: ['blue_ribbon'],
+            inventory: {
+                ginger_cookie: 5,
+                honey: 3,
+                ginger_candy: 4,
+                ginger_rice: 2,
+                ginger_tea: 3,
+                ginger_soup: 2
+            },
+            missionClaimed: false
+        };
+
+        /* FOOD ITEMS DATA */
+        const foodItems = {
+            ginger_cookie: { name: '生姜クッキー', icon: '🍪', hunger: 20, love: 5, price: 30, desc: 'サクサク甘い生姜クッキー' },
+            honey: { name: 'はちみつ', icon: '🍯', hunger: 15, love: 8, price: 40, desc: '生姜と合う甘いトロトロ蜜' },
+            ginger_candy: { name: '生姜キャンディー', icon: '🍬', hunger: 10, love: 10, price: 25, desc: 'Jiniちゃんのパッケージキャンディ' },
+            ginger_rice: { name: '生姜炊き込みご飯', icon: '🍚', hunger: 40, love: 12, price: 80, desc: '体がぽかぽか温まるご飯' },
+            ginger_tea: { name: '生姜紅茶', icon: '🫖', hunger: 15, love: 7, price: 45, desc: 'リラックスできる香りの紅茶' },
+            ginger_soup: { name: '生姜湯', icon: '🍵', hunger: 25, love: 10, price: 50, desc: '心もぽかぽか特製生姜湯' }
+        };
+
+        /* ACCESSORIES DATA */
+        const accessoryItems = {
+            blue_ribbon: { name: '水色チェックリボン', icon: '🎀', price: 0, svg: `` },
+            crown_gold: { name: 'きらきら王冠', icon: '👑', price: 250, svg: `<g transform="translate(100, 42)"><polygon points="-16,10 -22,-10 -8,0 0,-16 8,0 22,-10 16,10" fill="#ffd700" stroke="#212121" stroke-width="2.5"/><circle cx="-22" cy="-10" r="2.5" fill="#e91e63"/><circle cx="0" cy="-16" r="2.5" fill="#e91e63"/><circle cx="22" cy="-10" r="2.5" fill="#e91e63"/></g>` },
+            star_glasses: { name: '星がたメガネ', icon: '🕶️', price: 180, svg: `<g transform="translate(100, 93)" stroke="#e91e63" stroke-width="3" fill="rgba(255,255,255,0.4)"><polygon points="-24,-5 -16,5 -26,0 -16,-5 -24,-10"/><polygon points="24,-5 16,5 26,0 16,-5 24,-10"/><line x1="-14" y1="-3" x2="14" y2="-3"/></g>` },
+            flower_hat: { name: 'お花のかんむり', icon: '🌸', price: 200, svg: `<g transform="translate(62, 45)"><circle cx="0" cy="0" r="10" fill="#ff80ab"/><circle cx="0" cy="0" r="4" fill="#ffee58"/></g><g transform="translate(138, 45)"><circle cx="0" cy="0" r="10" fill="#ff80ab"/><circle cx="0" cy="0" r="4" fill="#ffee58"/></g>` },
+            ginger_leaf: { name: '生姜の葉っぱヘアー', icon: '🌱', price: 150, svg: `<g transform="translate(100, 45)"><path d="M 0 5 Q -20 -25 -5 -35 Q 10 -20 0 5 Z" fill="#66bb6a" stroke="#212121" stroke-width="2.5"/><path d="M 0 5 Q 20 -20 28 -10 Q 15 10 0 5 Z" fill="#81c784" stroke="#212121" stroke-width="2.5"/></g>` },
+            angel_ring: { name: '天使の輪', icon: '👼', price: 220, svg: `<g transform="translate(100, 36)"><ellipse cx="0" cy="0" rx="28" ry="8" fill="none" stroke="#fff176" stroke-width="5"/><ellipse cx="0" cy="0" rx="28" ry="8" fill="none" stroke="#ffd54f" stroke-width="2"/></g>` },
+            straw_hat: { name: '麦わら帽子', icon: '👒', price: 260, svg: `<g transform="translate(100, 46)"><ellipse cx="0" cy="4" rx="42" ry="12" fill="#ffe082" stroke="#212121" stroke-width="3"/><path d="M -24 4 C -24 -22 24 -22 24 4 Z" fill="#ffd54f" stroke="#212121" stroke-width="3"/><rect x="-24" y="-2" width="48" height="5" fill="#e91e63"/></g>` },
+            heart_glasses: { name: 'ピンクハートサングラス', icon: '😎', price: 190, svg: `<g transform="translate(100, 93)" stroke="#d81b60" stroke-width="3" fill="#f48fb1" opacity="0.85"><path d="M -22 -12 C -32 -24 -42 -2 -22 10 C -2  -2 -12 -24 -22 -12 Z"/><path d="M 22 -12 C 12 -24 2 -2 22 10 C 42 -2 32 -24 22 -12 Z"/><line x1="-10" y1="-5" x2="10" y2="-5"/></g>` },
+            swirl_cheeks: { name: 'ほっぺの渦巻き赤み', icon: '🌀', price: 120, svg: `<g transform="translate(68, 107)" stroke="#ff7043" stroke-width="2.5" fill="none"><path d="M 0 0 A 3 3 0 0 1 -3 -3 A 6 6 0 0 1 3 -3 A 9 9 0 0 1 -6 3"/></g><g transform="translate(132, 107)" stroke="#ff7043" stroke-width="2.5" fill="none"><path d="M 0 0 A 3 3 0 0 1 -3 -3 A 6 6 0 0 1 3 -3 A 9 9 0 0 1 -6 3"/></g>` }
+        };
+
+        /* FRIENDS DATA */
+        const friendsData = [
+            { id: 'megumi', name: '芽ぐみちゃん', desc: '新芽の妖精。生姜の育ちを見守るお友達。', color: '#a5d6a7', avatar: '🌱' },
+            { id: 'hana', name: 'はなちゃん', desc: 'お花が大好きでおしゃれな可愛いお友達。', color: '#f8bbd0', avatar: '🌸' },
+            { id: 'honey', name: 'ハニーちゃん', desc: 'はちみつが大好きでいつも甘い香りがするよ。', color: '#ffe082', avatar: '🐝' },
+            { id: 'jiiji', name: 'じいじ', desc: '親生姜のじいじ。生姜の知識がとっても豊富！', color: '#bcaaa4', avatar: '👴' },
+            { id: 'baaba', name: 'ばあば', desc: '親生姜のばあば。美味しい生姜料理を作ってくれる。', color: '#d7ccc8', avatar: '👵' }
+        ];
+
+        /* DIALOGUES */
+        const dialogueList = [
+            "今日はいい天気だね〜！いっしょにあそぼう♪",
+            "生姜クッキーを食べると、元気が湧いてくるよ！🍪",
+            "芽ぐみちゃん達とお茶会したいな〜☕",
+            "生姜畑の風はとってもきもちいいんだよ🌱",
+            "いつもいっしょにいてくれてありがとう💖"
+        ];
+
+        /* GLOBAL GAME VARIABLES */
+        let gameInterval = null;
+        let spawnerInterval = null;
+        let timerInterval = null;
+        let gameScore = 0;
+        let gameTimeLeft = 15;
+        let playerX = 120;
+        let fallingItems = [];
+        let currentGameType = 'candy';
+
+        /* INITIALIZATION */
+        window.onload = function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            renderUI();
+            renderAccessories();
+            
+            // Random decrease stats over time
+            setInterval(() => {
+                gameState.hunger = Math.max(0, gameState.hunger - 1);
+                gameState.clean = Math.max(0, gameState.clean - 1);
+                gameState.happy = Math.max(0, gameState.happy - 1);
+                renderUI();
+            }, 10000);
+
+            // Random visitor interval
+            setInterval(randomVisitorEvent, 25000);
+        };
+
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            document.getElementById('real-time').innerText = timeStr;
+        }
+
+        function renderUI() {
+            document.getElementById('coin-count').innerText = gameState.coins.toLocaleString();
+            document.getElementById('shop-coin-display').innerText = gameState.coins.toLocaleString();
+            
+            document.getElementById('stat-hunger-num').innerText = `${gameState.hunger}%`;
+            document.getElementById('stat-hunger-bar').style.width = `${gameState.hunger}%`;
+
+            document.getElementById('stat-clean-num').innerText = `${gameState.clean}%`;
+            document.getElementById('stat-clean-bar').style.width = `${gameState.clean}%`;
+
+            document.getElementById('stat-happy-num').innerText = `${gameState.happy}%`;
+            document.getElementById('stat-happy-bar').style.width = `${gameState.happy}%`;
+
+            document.getElementById('stat-love-num').innerText = `${gameState.love}%`;
+            document.getElementById('stat-love-bar').style.width = `${gameState.love}%`;
+
+            document.getElementById('friend-level').innerText = `Lv.${gameState.level}`;
+        }
+
+        function renderAccessories() {
+            const accLayer = document.getElementById('accessory-layer');
+            const equipped = gameState.equippedAcc;
+
+            if (equipped && accessoryItems[equipped]) {
+                accLayer.innerHTML = accessoryItems[equipped].svg;
+            } else {
+                accLayer.innerHTML = '';
+            }
+        }
+
+        function touchJini() {
+            const wrapper = document.getElementById('jini-wrapper');
+            wrapper.classList.remove('jini-idle');
+            wrapper.classList.add('jini-happy-anim');
+
+            gameState.love = Math.min(100, gameState.love + 2);
+            gameState.happy = Math.min(100, gameState.happy + 2);
+            renderUI();
+
+            showParticle('💖');
+
+            const randDialogue = dialogueList[Math.floor(Math.random() * dialogueList.length)];
+            document.getElementById('speech-text').innerText = randDialogue;
+
+            setTimeout(() => {
+                wrapper.classList.remove('jini-happy-anim');
+                wrapper.classList.add('jini-idle');
+            }, 1600);
+        }
+
+        function showParticle(text) {
+            const overlay = document.getElementById('effect-overlay');
+            const particle = document.createElement('div');
+            particle.className = 'absolute text-xl font-bold text-pink-500 animate-[float-up_1.2s_ease-out_forwards]';
+            particle.innerText = text;
+            overlay.appendChild(particle);
+
+            setTimeout(() => particle.remove(), 1200);
+        }
+
+        function takeBath() {
+            gameState.clean = 100;
+            gameState.happy = Math.min(100, gameState.happy + 10);
+            renderUI();
+
+            showParticle('🧼 ぴかぴか！');
+            document.getElementById('speech-text').innerText = "あわあわお風呂できれいさっぱり気持ちいい〜！✨";
+            touchJini();
+        }
+
+        /* MINI GAMES IMPLEMENTATION */
+        function startCandyCatchGame() {
+            currentGameType = 'candy';
+            document.getElementById('game-title-text').innerText = '🍬 お菓子キャッチ';
+            initMiniGameScreen();
+        }
+
+        function startGingerWalkGame() {
+            currentGameType = 'ginger';
+            document.getElementById('game-title-text').innerText = '🌱 生姜畑のお散歩';
+            initMiniGameScreen();
+        }
+
+        function initMiniGameScreen() {
+            document.getElementById('game-select-view').classList.add('hidden');
+            document.getElementById('mini-game-view').classList.remove('hidden');
+
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+
+            gameScore = 0;
+            gameTimeLeft = 15;
+            playerX = 120;
+            fallingItems = [];
+
+            document.getElementById('game-score').innerText = gameScore;
+            document.getElementById('game-timer').innerText = gameTimeLeft;
+
+            document.getElementById('btn-left').onclick = () => playerX = Math.max(20, playerX - 25);
+            document.getElementById('btn-right').onclick = () => playerX = Math.min(240, playerX + 25);
+
+            if (spawnerInterval) clearInterval(spawnerInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            if (gameInterval) clearInterval(gameInterval);
+
+            spawnerInterval = setInterval(() => {
+                if (currentGameType === 'candy') {
+                    fallingItems.push({
+                        x: Math.random() * 240 + 20,
+                        y: 0,
+                        speed: Math.random() * 2 + 3,
+                        type: Math.random() > 0.3 ? '🍬' : '🍪',
+                        points: 10
+                    });
+                } else {
+                    const r = Math.random();
+                    let itemType = '🫚';
+                    let pts = 10;
+                    if (r < 0.25) { itemType = '💖'; pts = 15; }
+                    else if (r < 0.55) { itemType = '🫚'; pts = 10; }
+                    else { itemType = '🌿'; pts = -5; }
+
+                    fallingItems.push({
+                        x: Math.random() * 240 + 20,
+                        y: 0,
+                        speed: Math.random() * 2.5 + 3.5,
+                        type: itemType,
+                        points: pts
+                    });
+                }
+            }, 500);
+
+            timerInterval = setInterval(() => {
+                gameTimeLeft--;
+                document.getElementById('game-timer').innerText = gameTimeLeft;
+                if (gameTimeLeft <= 0) {
+                    endMiniGame();
+                }
+            }, 1000);
+
+            gameInterval = setInterval(() => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                if (currentGameType === 'ginger') {
+                    ctx.fillStyle = '#e8f5e9';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                } else {
+                    ctx.fillStyle = '#f0f9ff';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+
+                ctx.fillStyle = currentGameType === 'ginger' ? '#81c784' : '#ffb74d';
+                ctx.beginPath();
+                ctx.arc(playerX, 270, 22, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.font = '18px sans-serif';
+                ctx.fillText(currentGameType === 'ginger' ? '🧺' : '🐣', playerX - 9, 276);
+
+                for (let i = fallingItems.length - 1; i >= 0; i--) {
+                    const c = fallingItems[i];
+                    c.y += c.speed;
+                    ctx.fillText(c.type, c.x - 8, c.y);
+
+                    if (c.y >= 245 && c.y <= 285 && Math.abs(c.x - playerX) < 28) {
+                        gameScore = Math.max(0, gameScore + c.points);
+                        document.getElementById('game-score').innerText = gameScore;
+                        fallingItems.splice(i, 1);
+                    } else if (c.y > 300) {
+                        fallingItems.splice(i, 1);
+                    }
+                }
+            }, 1000 / 30);
+        }
+
+        function endMiniGame() {
+            if (gameInterval) clearInterval(gameInterval);
+            if (spawnerInterval) clearInterval(spawnerInterval);
+            if (timerInterval) clearInterval(timerInterval);
+
+            const earnedCoins = gameScore;
+            gameState.coins += earnedCoins;
+            gameState.happy = Math.min(100, gameState.happy + (currentGameType === 'ginger' ? 30 : 20));
+            renderUI();
+
+            const titleName = currentGameType === 'ginger' ? '生姜畑のお散歩' : 'お菓子キャッチ';
+            alert(`【${titleName} 終了！】\nスコア: ${gameScore}\n🪙 ${earnedCoins} コインゲット！`);
+            
+            document.getElementById('mini-game-view').classList.add('hidden');
+            document.getElementById('game-select-view').classList.remove('hidden');
+            closeModal('play-modal');
+            
+            if (currentGameType === 'ginger') {
+                document.getElementById('speech-text').innerText = "生姜畑でお散歩してリフレッシュしたよ！🌱";
+            } else {
+                document.getElementById('speech-text').innerText = "お菓子キャッチ楽しかった〜！🍬";
+            }
+        }
+
+        /* MODAL CONTROL */
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            if (id === 'food-modal') renderFoodMenu();
+            if (id === 'dress-modal') renderDressMenu();
+            if (id === 'zukan-modal') renderZukanMenu();
+            if (id === 'shop-modal') renderShopMenu('food');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        /* FOOD MENU */
+        function renderFoodMenu() {
+            const container = document.getElementById('food-list-container');
+            container.innerHTML = '';
+
+            Object.keys(foodItems).forEach(key => {
+                const item = foodItems[key];
+                const count = gameState.inventory[key] || 0;
+
+                const card = document.createElement('div');
+                card.className = 'bg-white border-2 border-amber-200 rounded-2xl p-2.5 shadow-sm flex flex-col items-center text-center justify-between';
+                card.innerHTML = `
+                    <div class="text-3xl mb-1">${item.icon}</div>
+                    <div class="font-black text-xs text-amber-950">${item.name}</div>
+                    <div class="text-[10px] text-gray-500 mb-2">所持: ${count}個</div>
+                    <button onclick="feedJini('${key}')" ${count <= 0 ? 'disabled' : ''} 
+                        class="w-full text-xs font-black py-1 rounded-xl shadow cute-button ${count > 0 ? 'bg-amber-400 text-amber-950 hover:bg-amber-500' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}">
+                        あげる
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function feedJini(key) {
+            if (gameState.inventory[key] > 0) {
+                gameState.inventory[key]--;
+                const item = foodItems[key];
+
+                gameState.hunger = Math.min(100, gameState.hunger + item.hunger);
+                gameState.love = Math.min(100, gameState.love + item.love);
+                renderUI();
+                renderFoodMenu();
+
+                showParticle('😋 おいしい！');
+                document.getElementById('speech-text').innerText = `もぐもぐ… ${item.name}、とっても美味しい〜！`;
+                touchJini();
+            }
+        }
+
+        /* DRESS UP MENU */
+        function renderDressMenu() {
+            const container = document.getElementById('accessory-list-container');
+            container.innerHTML = '';
+
+            Object.keys(accessoryItems).forEach(key => {
+                const item = accessoryItems[key];
+                const isUnlocked = gameState.unlockedAccs.includes(key);
+                const isEquipped = gameState.equippedAcc === key;
+
+                const card = document.createElement('div');
+                card.className = 'bg-white border-2 border-pink-200 rounded-2xl p-3 shadow-sm flex flex-col items-center justify-between text-center';
+                card.innerHTML = `
+                    <div class="text-3xl mb-1">${item.icon}</div>
+                    <div class="font-black text-xs text-amber-950 mb-2">${item.name}</div>
+                    ${isUnlocked ? `
+                        <button onclick="equipAccessory('${key}')" class="w-full text-xs font-black py-1 rounded-xl shadow cute-button ${isEquipped ? 'bg-pink-500 text-white' : 'bg-pink-100 text-pink-700 hover:bg-pink-200'}">
+                            ${isEquipped ? '着用中' : 'つける'}
+                        </button>
+                    ` : `
+                        <div class="text-[10px] text-gray-400 font-bold">ショップで未解放</div>
+                    `}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function equipAccessory(key) {
+            if (gameState.equippedAcc === key && key !== 'blue_ribbon') {
+                gameState.equippedAcc = 'blue_ribbon';
+            } else {
+                gameState.equippedAcc = key;
+            }
+            renderAccessories();
+            renderDressMenu();
+        }
+
+        /* FRIENDS / ZUKAN */
+        function renderZukanMenu() {
+            const container = document.getElementById('friends-list-container');
+            container.innerHTML = '';
+
+            friendsData.forEach(friend => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border-2 border-orange-200 rounded-2xl p-2.5 shadow-sm flex items-center space-x-3';
+                card.innerHTML = `
+                    <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-2xl shadow-inner" style="background-color: ${friend.color}">
+                        ${friend.avatar}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-black text-xs text-amber-950">${friend.name}</div>
+                        <div class="text-[10px] text-gray-500">${friend.desc}</div>
+                    </div>
+                    <button onclick="inviteFriend('${friend.name}', '${friend.avatar}')" class="bg-orange-400 text-white text-xs font-black px-2.5 py-1 rounded-xl shadow cute-button hover:bg-orange-500">
+                        呼ぶ
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function inviteFriend(name, avatar) {
+            closeModal('zukan-modal');
+            spawnVisitor(name, avatar);
+            document.getElementById('speech-text').innerText = `${name}が遊びに来てくれたよ！`;
+        }
+
+        function spawnVisitor(name, avatar) {
+            const visitor = document.getElementById('visitor-container');
+            const char = document.getElementById('visitor-character');
+            char.innerHTML = avatar;
+            
+            document.getElementById('visitor-bubble').innerText = `${name}が来たよ！`;
+
+            visitor.classList.remove('translate-y-12', 'opacity-0');
+            visitor.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                visitor.classList.remove('translate-y-0', 'opacity-100');
+                visitor.classList.add('translate-y-12', 'opacity-0');
+            }, 10000);
+        }
+
+        function interactVisitor() {
+            gameState.coins += 50;
+            gameState.happy = Math.min(100, gameState.happy + 15);
+            renderUI();
+            showParticle('🪙 +50');
+            document.getElementById('speech-text').innerText = "お友達とおしゃべりしてプレゼントをもらったよ！";
+        }
+
+        function randomVisitorEvent() {
+            if (Math.random() < 0.45) {
+                const f = friendsData[Math.floor(Math.random() * friendsData.length)];
+                spawnVisitor(f.name, f.avatar);
+            }
+        }
+
+        /* SHOP MENU */
+        let currentShopTab = 'food';
+        function switchShopTab(tab) {
+            currentShopTab = tab;
+            document.getElementById('tab-food').className = tab === 'food' ? 'flex-1 py-1.5 font-black text-xs text-amber-950 border-b-2 border-amber-500' : 'flex-1 py-1.5 font-black text-xs text-gray-400';
+            document.getElementById('tab-acc').className = tab === 'acc' ? 'flex-1 py-1.5 font-black text-xs text-amber-950 border-b-2 border-amber-500' : 'flex-1 py-1.5 font-black text-xs text-gray-400';
+            renderShopMenu(tab);
+        }
+
+        function renderShopMenu(tab) {
+            const container = document.getElementById('shop-items-container');
+            container.innerHTML = '';
+
+            if (tab === 'food') {
+                Object.keys(foodItems).forEach(key => {
+                    const item = foodItems[key];
+                    const card = document.createElement('div');
+                    card.className = 'bg-white border-2 border-amber-200 rounded-2xl p-2.5 shadow-sm flex items-center justify-between';
+                    card.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl">${item.icon}</span>
+                            <div>
+                                <div class="font-black text-xs text-amber-950">${item.name}</div>
+                                <div class="text-[10px] text-gray-400">${item.desc}</div>
+                            </div>
+                        </div>
+                        <button onclick="buyFood('${key}')" class="bg-yellow-400 hover:bg-yellow-500 text-amber-950 text-xs font-black px-3 py-1 rounded-xl shadow cute-button">
+                            🪙 ${item.price}
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            } else {
+                Object.keys(accessoryItems).forEach(key => {
+                    if (key === 'blue_ribbon') return;
+                    const item = accessoryItems[key];
+                    const isUnlocked = gameState.unlockedAccs.includes(key);
+
+                    const card = document.createElement('div');
+                    card.className = 'bg-white border-2 border-pink-200 rounded-2xl p-2.5 shadow-sm flex items-center justify-between';
+                    card.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <span class="text-2xl">${item.icon}</span>
+                            <div>
+                                <div class="font-black text-xs text-amber-950">${item.name}</div>
+                            </div>
+                        </div>
+                        ${isUnlocked ? `
+                            <span class="text-xs font-black text-gray-400">購入済み</span>
+                        ` : `
+                            <button onclick="buyAcc('${key}')" class="bg-pink-400 hover:bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-xl shadow cute-button">
+                                🪙 ${item.price}
+                            </button>
+                        `}
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        function buyFood(key) {
+            const item = foodItems[key];
+            if (gameState.coins >= item.price) {
+                gameState.coins -= item.price;
+                gameState.inventory[key] = (gameState.inventory[key] || 0) + 1;
+                renderUI();
+                renderShopMenu('food');
+                showParticle('🛒 購入完了!');
+            } else {
+                alert('コインが足りないよ！');
+            }
+        }
+
+        function buyAcc(key) {
+            const item = accessoryItems[key];
+            if (gameState.coins >= item.price) {
+                gameState.coins -= item.price;
+                gameState.unlockedAccs.push(key);
+                renderUI();
+                renderShopMenu('acc');
+                showParticle('✨ ゲット!');
+            } else {
+                alert('コインが足りないよ！');
+            }
+        }
+
+        /* MISSION */
+        function claimMission() {
+            if (!gameState.missionClaimed && gameState.hunger >= 90) {
+                gameState.missionClaimed = true;
+                gameState.coins += 50;
+                renderUI();
+
+                const btn = document.getElementById('mission-claim-btn');
+                btn.className = 'bg-gray-200 text-gray-500 font-bold px-2.5 py-1 rounded-xl cursor-not-allowed text-[10px]';
+                btn.innerText = '達成済み';
+                showParticle('🪙 +50');
+            } else if (gameState.hunger < 90) {
+                alert('おなかを90%以上にしてね！');
+            }
+        }
+    </script>
+</body>
+</html>
