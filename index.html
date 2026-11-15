@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jiniちゃん ジンジャーバターキャンディ育成アプリ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>生姜の妖精Jiniちゃんはぐくみアプリ</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Zen Maru Gothic -->
@@ -11,6 +11,10 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- 💛 黄色いハートアイコン -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fef08a%22/><text y=%22.9em%22 font-size=%2290%22>💛</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23fef08a%22/><text y=%22.9em%22 font-size=%2290%22>💛</text></svg>">
+
     <style>
         body {
             font-family: 'Zen Maru Gothic', sans-serif;
@@ -109,18 +113,23 @@
         
         <!-- HEADER STATUS BAR -->
         <header class="bg-gradient-to-b from-[#fff5e6] to-[#ffe8cc] p-3 border-b-3 border-[#ffd6a5] z-10 shadow-sm">
-            <!-- Top info bar: Clock, Coins, Shop button -->
+            <!-- Top info bar: Clock, Coins, Schedule button, Shop button -->
             <div class="flex justify-between items-center mb-2 text-xs font-bold text-amber-900">
                 <div class="flex items-center space-x-1 bg-white/90 px-3 py-1 rounded-full shadow-sm border border-amber-200">
                     <i class="far fa-clock text-amber-500"></i>
                     <span id="real-time">9:41 AM</span>
                 </div>
                 
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-1.5">
                     <div class="flex items-center space-x-1.5 bg-amber-300 text-amber-950 px-3.5 py-1 rounded-full shadow-sm border border-amber-400 font-extrabold text-xs">
                         <span class="text-sm">🪙</span>
                         <span id="coin-count" class="text-sm">1,250</span>
                     </div>
+                    <!-- 📅 スケジュール予定ボタン -->
+                    <button onclick="openModal('schedule-modal')" class="relative w-8 h-8 bg-rose-100 hover:bg-rose-200 rounded-full flex items-center justify-center text-rose-900 text-xs border border-rose-200 shadow cute-button" title="ジニちゃんの予定メモ">
+                        📅
+                        <span id="schedule-badge" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white"></span>
+                    </button>
                     <button onclick="openModal('shop-modal')" class="bg-gradient-to-r from-pink-400 to-rose-400 text-white font-bold px-3 py-1 rounded-full shadow cute-button flex items-center gap-1 text-xs">
                         <i class="fas fa-shopping-cart"></i> ショップ
                     </button>
@@ -201,7 +210,7 @@
 
             <!-- Speech Bubble -->
             <div class="w-full z-10 my-1 px-2">
-                <div class="speech-bubble p-2.5 text-center text-amber-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2">
+                <div id="speech-bubble-box" onclick="cycleSpeech()" class="speech-bubble p-2.5 text-center text-amber-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 cursor-pointer hover:bg-amber-50/50 transition">
                     <span id="speech-icon" class="text-base">🎵</span>
                     <span id="speech-text">今日はいい天気だね〜！いっしょにあそぼう♪</span>
                 </div>
@@ -281,24 +290,12 @@
                             <path id="mouth" d="M 86 112 Q 100 130 114 112 Z" fill="#e53935" stroke="#212121" stroke-width="3.5" stroke-linejoin="round"/>
                         </g>
 
-                        <!-- BLUE RIBBON -->
-                        <g id="blue-check-ribbon" transform="translate(136, 68) rotate(-12)">
-                            <path d="M -4 0 C -22 -18 -32 8 -4 5 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="3"/>
-                            <path d="M 4 0 C 22 -18 32 8 4 5 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="3"/>
-                            <path d="M -2 4 L -10 20 L -2 15 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="2"/>
-                            <path d="M 2 4 L 10 20 L 2 15 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="2"/>
-                            <circle cx="0" cy="2" r="8.5" fill="#ffd54f" stroke="#212121" stroke-width="2.5"/>
-                            <circle cx="-3" cy="0" r="1.2" fill="#212121"/>
-                            <circle cx="3" cy="0" r="1.2" fill="#212121"/>
-                            <path d="M -3 3 Q 0 6 3 3" fill="none" stroke="#212121" stroke-width="1.5" stroke-linecap="round"/>
-                        </g>
-
                         <!-- DYNAMIC ACCESSORY LAYER -->
                         <g id="accessory-layer"></g>
                     </svg>
                 </div>
 
-                <!-- Level Badge -->
+                <!-- Level Badge (なかよし度) -->
                 <div class="absolute right-2 bottom-4 bg-white/95 border-3 border-pink-200 rounded-2xl p-2 shadow-md text-center flex flex-col items-center">
                     <div class="text-[10px] font-black text-pink-500 flex items-center gap-1">
                         <i class="fas fa-heart"></i> なかよし度
@@ -350,7 +347,8 @@
                         🪙 50
                     </button>
                 </div>
-                <div class="col-span-2 bg-gradient-to-r from-pink-300 to-purple-300 border-2 border-pink-400 rounded-2xl p-1.5 shadow-sm flex items-center justify-between text-white text-[10px] font-bold">
+                <!-- 🌟 タップできるイベントバナー (NEW!) -->
+                <div onclick="openModal('event-modal')" class="col-span-2 bg-gradient-to-r from-pink-300 to-purple-300 border-2 border-pink-400 rounded-2xl p-1.5 shadow-sm flex items-center justify-between text-white text-[10px] font-bold cursor-pointer hover:scale-[1.02] active:scale-95 transition">
                     <div>
                         <div class="text-yellow-200 font-black">⭐ イベント中！</div>
                         <div class="text-[9px]">ハッピーキャンディフェス</div>
@@ -370,6 +368,53 @@
 
 
     <!-- ==================== MODALS ==================== -->
+
+    <!-- 📅 予定メモ帳モーダル -->
+    <div id="schedule-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
+        <div class="bg-[#fffcf7] rounded-3xl p-5 w-full max-w-sm border-4 border-rose-300 shadow-2xl relative flex flex-col gap-3">
+            <button onclick="closeModal('schedule-modal')" class="absolute top-3 right-3 bg-rose-400 text-white w-8 h-8 rounded-full font-bold shadow hover:bg-rose-500">✕</button>
+            <div class="text-center">
+                <h3 class="font-black text-rose-950 text-base">📅 ジニちゃんの予定メモ</h3>
+                <p class="text-[10px] text-rose-700 mt-0.5">スマホに保存されるから安心してね🔒</p>
+            </div>
+            
+            <div class="bg-rose-50/80 p-2.5 rounded-2xl border border-rose-200 flex flex-col gap-2">
+                <div class="flex gap-1.5">
+                    <input type="date" id="sched-date" class="bg-white border border-rose-200 rounded-xl px-2 py-1.5 text-xs font-bold text-slate-700 w-36 focus:outline-none">
+                    <input type="text" id="sched-text" placeholder="例：マルシェ出店、納品日" class="bg-white border border-rose-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-700 flex-1 min-w-0 focus:outline-none">
+                </div>
+                <button onclick="addSchedule()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-black py-2 rounded-xl text-xs shadow-sm active:scale-95 transition">
+                    ＋ この予定をおぼえてもらう
+                </button>
+            </div>
+            
+            <div id="schedule-list" class="flex flex-col gap-1.5 max-h-48 overflow-y-auto pr-1"></div>
+            <button onclick="closeModal('schedule-modal')" class="w-full bg-rose-100 text-rose-950 font-black py-2 rounded-xl text-xs">閉じる</button>
+        </div>
+    </div>
+
+    <!-- ⭐ イベント情報モーダル (NEW!) -->
+    <div id="event-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
+        <div class="bg-[#fffcf7] rounded-3xl p-5 w-full max-w-sm border-4 border-purple-300 shadow-2xl relative flex flex-col gap-3 text-center">
+            <button onclick="closeModal('event-modal')" class="absolute top-3 right-3 bg-rose-400 text-white w-8 h-8 rounded-full font-bold shadow hover:bg-rose-500">✕</button>
+            <div class="text-3xl">🍬✨</div>
+            <h3 class="font-black text-purple-950 text-base">ハッピーキャンディフェス開催中！</h3>
+            <p class="text-xs text-purple-800 leading-relaxed">
+                ただいま生姜畑では甘いキャンディがいっぱいのフェスティバルを開催中！<br>
+                毎日ログインしてイベントボーナスを受け取ろう！
+            </p>
+            <div class="bg-purple-50 p-3 rounded-2xl border border-purple-200 flex items-center justify-between">
+                <div class="text-left text-xs font-black text-purple-950">
+                    <div>🎁 デイリーフェスボーナス</div>
+                    <div class="text-[10px] text-purple-600 font-bold">毎日1回コインがもらえるよ</div>
+                </div>
+                <button id="event-claim-btn" onclick="claimEventBonus()" class="bg-purple-500 hover:bg-purple-600 text-white font-black px-3 py-1.5 rounded-xl text-xs shadow cute-button">
+                    うけとる (🪙 100)
+                </button>
+            </div>
+            <button onclick="closeModal('event-modal')" class="w-full bg-purple-100 text-purple-950 font-black py-2 rounded-xl text-xs">とじる</button>
+        </div>
+    </div>
 
     <!-- 1. FOOD MODAL -->
     <div id="food-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center hidden p-4">
@@ -415,7 +460,6 @@
                     <span>スコア: <span id="game-score" class="text-pink-500">0</span></span>
                     <span>残り: <span id="game-timer" class="text-emerald-600">15</span>s</span>
                 </div>
-                <!-- Drag/Touch sensitive Canvas area -->
                 <canvas id="game-canvas" width="280" height="300" class="border-3 border-emerald-300 rounded-2xl bg-sky-50 shadow-inner cursor-pointer touch-none"></canvas>
                 <div class="text-[10px] text-emerald-800 font-bold mt-1">💡 画面上のドラッグ・タッチ操作でもスムーズに移動できます</div>
                 <div class="flex gap-4 mt-2">
@@ -472,7 +516,7 @@
             happy: 92,
             love: 87,
             level: 5,
-            exp: 50,
+            exp: 50, // なかよし度レベルアップまでの残りポイント
             equippedAcc: 'blue_ribbon',
             unlockedAccs: ['blue_ribbon'],
             inventory: {
@@ -483,22 +527,13 @@
                 ginger_tea: 3,
                 ginger_soup: 2
             },
-            missionClaimed: false
-        };
-
-        /* FOOD ITEMS DATA */
-        const foodItems = {
-            ginger_cookie: { name: '生姜クッキー', icon: '🍪', hunger: 20, love: 5, price: 30, desc: 'サクサク甘い生姜クッキー' },
-            honey: { name: 'はちみつ', icon: '🍯', hunger: 15, love: 8, price: 40, desc: '生姜と合う甘いトロトロ蜜' },
-            ginger_candy: { name: '生姜キャンディー', icon: '🍬', hunger: 10, love: 10, price: 25, desc: 'Jiniちゃんのパッケージキャンディ' },
-            ginger_rice: { name: '生姜炊き込みご飯', icon: '🍚', hunger: 40, love: 12, price: 80, desc: '体がぽかぽか温まるご飯' },
-            ginger_tea: { name: '生姜紅茶', icon: '🫖', hunger: 15, love: 7, price: 45, desc: 'リラックスできる香りの紅茶' },
-            ginger_soup: { name: '生姜湯', icon: '🍵', hunger: 25, love: 10, price: 50, desc: '心もぽかぽか特製生姜湯' }
+            missionClaimed: false,
+            lastEventClaim: ''
         };
 
         /* ACCESSORIES DATA */
         const accessoryItems = {
-            blue_ribbon: { name: '水色チェックリボン', icon: '🎀', price: 0, svg: `` },
+            blue_ribbon: { name: '水色チェックリボン', icon: '🎀', price: 0, svg: `<g transform="translate(136, 68) rotate(-12)"><path d="M -4 0 C -22 -18 -32 8 -4 5 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="3"/><path d="M 4 0 C 22 -18 32 8 4 5 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="3"/><path d="M -2 4 L -10 20 L -2 15 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="2"/><path d="M 2 4 L 10 20 L 2 15 Z" fill="url(#ginghamCheck)" stroke="#0277bd" stroke-width="2"/><circle cx="0" cy="2" r="8.5" fill="#ffd54f" stroke="#212121" stroke-width="2.5"/><circle cx="-3" cy="0" r="1.2" fill="#212121"/><circle cx="3" cy="0" r="1.2" fill="#212121"/><path d="M -3 3 Q 0 6 3 3" fill="none" stroke="#212121" stroke-width="1.5" stroke-linecap="round"/></g>` },
             crown_gold: { name: 'きらきら王冠', icon: '👑', price: 250, svg: `<g transform="translate(100, 42)"><polygon points="-16,10 -22,-10 -8,0 0,-16 8,0 22,-10 16,10" fill="#ffd700" stroke="#212121" stroke-width="2.5"/><circle cx="-22" cy="-10" r="2.5" fill="#e91e63"/><circle cx="0" cy="-16" r="2.5" fill="#e91e63"/><circle cx="22" cy="-10" r="2.5" fill="#e91e63"/></g>` },
             star_glasses: { name: '星がたメガネ', icon: '🕶️', price: 180, svg: `<g transform="translate(100, 93)" stroke="#e91e63" stroke-width="3" fill="rgba(255,255,255,0.4)"><polygon points="-24,-5 -16,5 -26,0 -16,-5 -24,-10"/><polygon points="24,-5 16,5 26,0 16,-5 24,-10"/><line x1="-14" y1="-3" x2="14" y2="-3"/></g>` },
             flower_hat: { name: 'お花のかんむり', icon: '🌸', price: 200, svg: `<g transform="translate(62, 45)"><circle cx="0" cy="0" r="10" fill="#ff80ab"/><circle cx="0" cy="0" r="4" fill="#ffee58"/></g><g transform="translate(138, 45)"><circle cx="0" cy="0" r="10" fill="#ff80ab"/><circle cx="0" cy="0" r="4" fill="#ffee58"/></g>` },
@@ -518,33 +553,51 @@
             { id: 'baaba', name: 'ばあば', desc: '親生姜のばあば。美味しい生姜料理を作ってくれる。', color: '#d7ccc8', avatar: '👵', eventType: 'baaba' }
         ];
 
-        /* DIALOGUES */
-        const dialogueList = [
-            "今日はいい天気だね〜！いっしょにあそぼう♪",
-            "生姜クッキーを食べると、元気が湧いてくるよ！🍪",
-            "芽ぐみちゃん達とお茶会したいな〜☕",
-            "生姜畑の風はとってもきもちいいんだよ🌱",
-            "いつもいっしょにいてくれてありがとう💖"
-        ];
+        /* FOOD ITEMS DATA */
+        const foodItems = {
+            ginger_cookie: { name: '生姜クッキー', icon: '🍪', hunger: 20, love: 5, price: 30, desc: 'サクサク甘い生姜クッキー' },
+            honey: { name: 'はちみつ', icon: '🍯', hunger: 15, love: 8, price: 40, desc: '生姜と合う甘いトロトロ蜜' },
+            ginger_candy: { name: '生姜キャンディー', icon: '🍬', hunger: 10, love: 10, price: 25, desc: 'Jiniちゃんのパッケージキャンディ' },
+            ginger_rice: { name: '生姜炊き込みご飯', icon: '🍚', hunger: 40, love: 12, price: 80, desc: '体がぽかぽか温まるご飯' },
+            ginger_tea: { name: '生姜紅茶', icon: '🫖', hunger: 15, love: 7, price: 45, desc: 'リラックスできる香りの紅茶' },
+            ginger_soup: { name: '生姜湯', icon: '🍵', hunger: 25, love: 10, price: 50, desc: '心もぽかぽか特製生姜湯' }
+        };
 
-        /* GLOBAL GAME VARIABLES */
-        let gameInterval = null;
-        let spawnerInterval = null;
-        let timerInterval = null;
-        let gameScore = 0;
-        let gameTimeLeft = 15;
-        let playerX = 120;
-        let fallingItems = [];
-        let currentGameType = 'candy';
+        let schedules = [];
+        let speechIndex = 0;
 
         /* INITIALIZATION */
         window.onload = function() {
+            const savedState = localStorage.getItem('ginger_jini_perfect_state');
+            if (savedState) {
+                try { Object.assign(gameState, JSON.parse(savedState)); } catch(e){}
+            }
+
+            const savedSched = localStorage.getItem('jini_schedules');
+            if (savedSched) {
+                try { schedules = JSON.parse(savedSched); } catch(e){}
+            }
+
+            const dateInput = document.getElementById('sched-date');
+            if (dateInput) dateInput.value = getTodayStr(0);
+
             updateClock();
             setInterval(updateClock, 1000);
             renderUI();
             renderAccessories();
-            
-            // Random decrease stats over time
+            updateSpeechBySchedule();
+
+            // すでに今日イベントボーナスを受け取っていたらボタンの状態を更新
+            const today = getTodayStr(0);
+            if (gameState.lastEventClaim === today) {
+                const btn = document.getElementById('event-claim-btn');
+                if (btn) {
+                    btn.innerText = '受取済み';
+                    btn.className = 'bg-gray-200 text-gray-400 font-bold px-3 py-1.5 rounded-xl text-xs cursor-not-allowed';
+                }
+            }
+
+            // Stats decrease over time
             setInterval(() => {
                 gameState.hunger = Math.max(0, gameState.hunger - 1);
                 gameState.clean = Math.max(0, gameState.clean - 1);
@@ -556,15 +609,31 @@
             setInterval(randomVisitorEvent, 25000);
         };
 
+        function saveGame() {
+            localStorage.setItem('ginger_jini_perfect_state', JSON.stringify(gameState));
+            localStorage.setItem('jini_schedules', JSON.stringify(schedules));
+        }
+
         function updateClock() {
             const now = new Date();
             const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
             document.getElementById('real-time').innerText = timeStr;
+            saveGame();
+        }
+
+        function getTodayStr(offsetDays = 0) {
+            const d = new Date();
+            d.setDate(d.getDate() + offsetDays);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
         }
 
         function renderUI() {
             document.getElementById('coin-count').innerText = gameState.coins.toLocaleString();
-            document.getElementById('shop-coin-display').innerText = gameState.coins.toLocaleString();
+            const shopCoin = document.getElementById('shop-coin-display');
+            if (shopCoin) shopCoin.innerText = gameState.coins.toLocaleString();
             
             document.getElementById('stat-hunger-num').innerText = `${gameState.hunger}%`;
             document.getElementById('stat-hunger-bar').style.width = `${gameState.hunger}%`;
@@ -579,17 +648,134 @@
             document.getElementById('stat-love-bar').style.width = `${gameState.love}%`;
 
             document.getElementById('friend-level').innerText = `Lv.${gameState.level}`;
+            document.getElementById('next-level-exp').innerText = `あと ${gameState.exp} ⭐`;
+
+            saveGame();
         }
 
         function renderAccessories() {
             const accLayer = document.getElementById('accessory-layer');
             const equipped = gameState.equippedAcc;
-
             if (equipped && accessoryItems[equipped]) {
                 accLayer.innerHTML = accessoryItems[equipped].svg;
             } else {
                 accLayer.innerHTML = '';
             }
+        }
+
+        /* ⭐ なかよし度レベルアップ判定関数 */
+        function addExp(amount) {
+            gameState.exp -= amount;
+            if (gameState.exp <= 0) {
+                gameState.level++;
+                gameState.exp = gameState.level * 50; // レベルが上がると次の目標値が増えるよ
+                const bonusCoins = gameState.level * 100;
+                gameState.coins += bonusCoins;
+                alert(`🎉 おめでとう！なかよし度が Lv.${gameState.level} にアップしたよ！\nご褒美として 🪙 ${bonusCoins} G ゲット！`);
+                showParticle('⭐ LEVEL UP!');
+            }
+            renderUI();
+        }
+
+        /* 📅 スケジュール連動の吹き出し制御 */
+        function getSpeechMessages() {
+            const today = getTodayStr(0);
+            const tomorrow = getTodayStr(1);
+            const todayItems = schedules.filter(s => s.date === today);
+            const tomorrowItems = schedules.filter(s => s.date === tomorrow);
+            const msgs = [];
+
+            if (todayItems.length > 0) {
+                const titles = todayItems.map(i => `『${i.text}』`).join('と');
+                msgs.push({ icon: '📅', text: `今日は${titles}の日だっち！応援してるよ〜！📣`, highlight: true });
+            }
+            if (tomorrowItems.length > 0) {
+                const titles = tomorrowItems.map(i => `『${i.text}』`).join('と');
+                msgs.push({ icon: '✨', text: `明日は${titles}があるっち！準備はバッチリ？`, highlight: true });
+            }
+
+            msgs.push({ icon: '🎵', text: '今日はいい天気だね〜！いっしょにあそぼう♪', highlight: false });
+            msgs.push({ icon: '🍪', text: '生姜クッキーを食べると、元気が湧いてくるよ！🍪', highlight: false });
+            msgs.push({ icon: '🌱', text: '生姜畑の風はとってもきもちいいんだよ🌱', highlight: false });
+            msgs.push({ icon: '📅', text: '上の📅ボタンから予定をおぼえられるよ！', highlight: false });
+            return msgs;
+        }
+
+        function updateSpeechBySchedule() {
+            const msgs = getSpeechMessages();
+            speechIndex = 0;
+            renderSpeech(msgs[0]);
+            const badge = document.getElementById('schedule-badge');
+            if (badge) {
+                if (msgs[0].highlight) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+            }
+        }
+
+        function cycleSpeech() {
+            const msgs = getSpeechMessages();
+            speechIndex = (speechIndex + 1) % msgs.length;
+            renderSpeech(msgs[speechIndex]);
+        }
+
+        function renderSpeech(msgObj) {
+            document.getElementById('speech-icon').innerText = msgObj.icon;
+            document.getElementById('speech-text').innerText = msgObj.text;
+            const bubble = document.getElementById('speech-bubble-box');
+            if (msgObj.highlight) {
+                bubble.style.borderColor = '#f43f5e';
+                bubble.style.background = '#fff1f2';
+            } else {
+                bubble.style.borderColor = '#ffd89b';
+                bubble.style.background = '#ffffff';
+            }
+        }
+
+        function addSchedule() {
+            const dateVal = document.getElementById('sched-date').value;
+            const textVal = document.getElementById('sched-text').value.trim();
+            if (!dateVal || !textVal) { alert('日付と予定を入力してね！'); return; }
+            schedules.push({ id: Date.now(), date: dateVal, text: textVal });
+            schedules.sort((a, b) => a.date.localeCompare(b.date));
+            saveGame();
+            document.getElementById('sched-text').value = '';
+            renderScheduleList();
+            updateSpeechBySchedule();
+            showParticle('📅');
+        }
+
+        function deleteSchedule(id) {
+            schedules = schedules.filter(s => s.id !== id);
+            saveGame();
+            renderScheduleList();
+            updateSpeechBySchedule();
+        }
+
+        function renderScheduleList() {
+            const listEl = document.getElementById('schedule-list');
+            if (!listEl) return;
+            if (schedules.length === 0) {
+                listEl.innerHTML = '<div class="text-center text-xs text-slate-400 py-4">まだ予定はないよ🌱</div>';
+                return;
+            }
+            const today = getTodayStr(0);
+            const tomorrow = getTodayStr(1);
+            listEl.innerHTML = schedules.map(item => {
+                let tag = '';
+                if (item.date === today) tag = '<span class="bg-rose-500 text-white text-[9px] px-1.5 py-0.5 rounded font-black">今日</span>';
+                else if (item.date === tomorrow) tag = '<span class="bg-amber-500 text-white text-[9px] px-1.5 py-0.5 rounded font-black">明日</span>';
+                const displayDate = item.date.slice(5).replace('-', '/');
+                return `
+                    <div class="bg-white p-2 rounded-xl border border-rose-100 flex justify-between items-center gap-2 shadow-xs">
+                        <div class="flex items-center gap-1.5 min-w-0">
+                            <span class="text-xs font-black text-rose-800 shrink-0">${displayDate}</span>
+                            ${tag}
+                            <span class="text-xs font-bold text-slate-800 truncate">${item.text}</span>
+                        </div>
+                        <button onclick="deleteSchedule(${item.id})" class="text-slate-400 hover:text-rose-500 text-xs font-black px-1.5 py-0.5 shrink-0">削除</button>
+                    </div>
+                `;
+            }).join('');
         }
 
         function touchJini() {
@@ -599,12 +785,11 @@
 
             gameState.love = Math.min(100, gameState.love + 2);
             gameState.happy = Math.min(100, gameState.happy + 2);
-            renderUI();
+            
+            // 💖 なでると少しなかよし度経験値が貯まる！
+            addExp(3);
 
             showParticle('💖');
-
-            const randDialogue = dialogueList[Math.floor(Math.random() * dialogueList.length)];
-            document.getElementById('speech-text').innerText = randDialogue;
 
             setTimeout(() => {
                 wrapper.classList.remove('jini-happy-anim');
@@ -614,9 +799,12 @@
 
         function showParticle(text) {
             const overlay = document.getElementById('effect-overlay');
+            if (!overlay) return;
             const particle = document.createElement('div');
-            particle.className = 'absolute text-xl font-bold text-pink-500 animate-[float-up_1.2s_ease-out_forwards]';
+            particle.className = 'absolute text-xl font-bold text-pink-500 animate-[float-up_1.2s_ease-out_forwards] z-30 pointer-events-none';
             particle.innerText = text;
+            particle.style.left = (40 + Math.random() * 20) + '%';
+            particle.style.top = (30 + Math.random() * 20) + '%';
             overlay.appendChild(particle);
 
             setTimeout(() => particle.remove(), 1200);
@@ -625,14 +813,45 @@
         function takeBath() {
             gameState.clean = 100;
             gameState.happy = Math.min(100, gameState.happy + 10);
-            renderUI();
+            
+            // 🛁 おふろできれいになると経験値アップ
+            addExp(10);
 
             showParticle('🧼 ぴかぴか！');
             document.getElementById('speech-text').innerText = "あわあわお風呂できれいさっぱり気持ちいい〜！✨";
             touchJini();
         }
 
+        /* ⭐ イベントボーナス受取関数 (NEW!) */
+        function claimEventBonus() {
+            const today = getTodayStr(0);
+            if (gameState.lastEventClaim === today) {
+                alert('今日のハッピーキャンディフェスボーナスはすでに受け取っているよ！また明日来てね✨');
+                return;
+            }
+            gameState.coins += 100;
+            gameState.lastEventClaim = today;
+            renderUI();
+            showParticle('🍬 +100 G');
+            alert('✨ ハッピーキャンディフェスボーナスで 🪙 100 G ゲットしたよ！');
+            
+            const btn = document.getElementById('event-claim-btn');
+            if (btn) {
+                btn.innerText = '受取済み';
+                btn.className = 'bg-gray-200 text-gray-400 font-bold px-3 py-1.5 rounded-xl text-xs cursor-not-allowed';
+            }
+        }
+
         /* MINI GAMES IMPLEMENTATION */
+        let gameInterval = null;
+        let spawnerInterval = null;
+        let timerInterval = null;
+        let gameScore = 0;
+        let gameTimeLeft = 15;
+        let playerX = 140;
+        let fallingItems = [];
+        let currentGameType = 'candy';
+
         function startCandyCatchGame() {
             currentGameType = 'candy';
             document.getElementById('game-title-text').innerText = '🍬 お菓子キャッチ';
@@ -660,7 +879,6 @@
             document.getElementById('game-score').innerText = gameScore;
             document.getElementById('game-timer').innerText = gameTimeLeft;
 
-            // Touch & Mouse Drag Controls for smooth movement
             function updatePlayerPositionFromPointer(clientX) {
                 const rect = canvas.getBoundingClientRect();
                 const scaleX = canvas.width / rect.width;
@@ -669,34 +887,18 @@
             }
 
             let isDragging = false;
+            canvas.onmousedown = (e) => { isDragging = true; updatePlayerPositionFromPointer(e.clientX); };
+            window.onmousemove = (e) => { if (isDragging) updatePlayerPositionFromPointer(e.clientX); };
+            window.onmouseup = () => { isDragging = false; };
 
-            canvas.onmousedown = (e) => {
-                isDragging = true;
-                updatePlayerPositionFromPointer(e.clientX);
-            };
-            window.onmousemove = (e) => {
-                if (isDragging) {
-                    updatePlayerPositionFromPointer(e.clientX);
-                }
-            };
-            window.onmouseup = () => {
-                isDragging = false;
-            };
-
-            // Touch events for mobile/tablet
-            canvas.ontouchstart = (e) => {
-                if (e.touches.length > 0) {
-                    updatePlayerPositionFromPointer(e.touches[0].clientX);
-                }
-            };
+            canvas.ontouchstart = (e) => { if (e.touches.length > 0) updatePlayerPositionFromPointer(e.touches[0].clientX); };
             canvas.ontouchmove = (e) => {
                 if (e.touches.length > 0) {
                     updatePlayerPositionFromPointer(e.touches[0].clientX);
-                    e.preventDefault(); // prevent scrolling while playing
+                    e.preventDefault();
                 }
             };
 
-            // Button controls fallback
             document.getElementById('btn-left').onclick = () => playerX = Math.max(20, playerX - 30);
             document.getElementById('btn-right').onclick = () => playerX = Math.min(260, playerX + 30);
 
@@ -783,7 +985,9 @@
             const earnedCoins = gameScore;
             gameState.coins += earnedCoins;
             gameState.happy = Math.min(100, gameState.happy + (currentGameType === 'ginger' ? 30 : 20));
-            renderUI();
+            
+            // 🎮 ミニゲームを遊ぶとなかよし度経験値が大きくアップ！
+            addExp(25);
 
             const titleName = currentGameType === 'ginger' ? '生姜畑のお散歩' : 'お菓子キャッチ';
             alert(`【${titleName} 終了！】\nスコア: ${gameScore}\n🪙 ${earnedCoins} コインゲット！`);
@@ -806,10 +1010,18 @@
             if (id === 'dress-modal') renderDressMenu();
             if (id === 'zukan-modal') renderZukanMenu();
             if (id === 'shop-modal') renderShopMenu('food');
+            if (id === 'schedule-modal') renderScheduleList();
         }
 
         function closeModal(id) {
             document.getElementById(id).classList.add('hidden');
+            if (id === 'play-modal') {
+                if (gameInterval) clearInterval(gameInterval);
+                if (spawnerInterval) clearInterval(spawnerInterval);
+                if (timerInterval) clearInterval(timerInterval);
+                document.getElementById('mini-game-view').classList.add('hidden');
+                document.getElementById('game-select-view').classList.remove('hidden');
+            }
         }
 
         /* FOOD MENU */
@@ -843,7 +1055,10 @@
 
                 gameState.hunger = Math.min(100, gameState.hunger + item.hunger);
                 gameState.love = Math.min(100, gameState.love + item.love);
-                renderUI();
+                
+                // 🍪 ごはんをあげると経験値アップ！
+                addExp(15);
+
                 renderFoodMenu();
 
                 showParticle('😋 おいしい！');
@@ -926,7 +1141,6 @@
             const char = document.getElementById('visitor-character');
             char.innerHTML = friend.avatar;
             
-            // Store current visitor event type on container dataset
             visitor.dataset.friendId = friend.id;
             visitor.dataset.friendName = friend.name;
 
@@ -957,19 +1171,19 @@
             if (fId === 'baaba') {
                 gameState.inventory.ginger_cookie = (gameState.inventory.ginger_cookie || 0) + 3;
                 gameState.happy = Math.min(100, gameState.happy + 20);
-                renderUI();
+                addExp(20);
                 showParticle('🍪 クッキー+3!');
                 document.getElementById('speech-text').innerText = `ばあばと一緒に生姜クッキーをたくさん作ったよ！✨`;
             } else if (fId === 'jiiji') {
                 gameState.coins += 80;
                 gameState.love = Math.min(100, gameState.love + 20);
-                renderUI();
+                addExp(20);
                 showParticle('🎴 🪙 +80');
                 document.getElementById('speech-text').innerText = `じいじとトランプで遊んで楽しかったな〜♪`;
             } else {
                 gameState.coins += 50;
                 gameState.happy = Math.min(100, gameState.happy + 15);
-                renderUI();
+                addExp(15);
                 showParticle('🪙 +50');
                 document.getElementById('speech-text').innerText = `${fName}とおしゃべりしてプレゼントをもらったよ！`;
             }
@@ -985,8 +1199,8 @@
             }
         }
 
-     /* SHOP MENU */
-     let currentShopTab = 'food';
+        /* SHOP MENU */
+        let currentShopTab = 'food';
         function switchShopTab(tab) {
             currentShopTab = tab;
             document.getElementById('tab-food').className = tab === 'food' ? 'flex-1 py-1.5 font-black text-xs text-amber-950 border-b-2 border-amber-500' : 'flex-1 py-1.5 font-black text-xs text-gray-400';
@@ -1076,6 +1290,7 @@
             if (!gameState.missionClaimed && gameState.hunger >= 90) {
                 gameState.missionClaimed = true;
                 gameState.coins += 50;
+                addExp(20);
                 renderUI();
 
                 const btn = document.getElementById('mission-claim-btn');
