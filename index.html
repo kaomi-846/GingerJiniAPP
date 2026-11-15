@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>生姜の妖精GingerJiniちゃんはぐくみアプリ </title>
+    <title>Jiniちゃん ジンジャーバターキャンディ育成アプリ</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Zen Maru Gothic -->
@@ -415,8 +415,10 @@
                     <span>スコア: <span id="game-score" class="text-pink-500">0</span></span>
                     <span>残り: <span id="game-timer" class="text-emerald-600">15</span>s</span>
                 </div>
-                <canvas id="game-canvas" width="280" height="300" class="border-3 border-emerald-300 rounded-2xl bg-sky-50 shadow-inner"></canvas>
-                <div class="flex gap-4 mt-3">
+                <!-- Drag/Touch sensitive Canvas area -->
+                <canvas id="game-canvas" width="280" height="300" class="border-3 border-emerald-300 rounded-2xl bg-sky-50 shadow-inner cursor-pointer touch-none"></canvas>
+                <div class="text-[10px] text-emerald-800 font-bold mt-1">💡 画面上のドラッグ・タッチ操作でもスムーズに移動できます</div>
+                <div class="flex gap-4 mt-2">
                     <button id="btn-left" class="bg-emerald-500 text-white px-6 py-2 rounded-xl font-black text-lg shadow cute-button">◀</button>
                     <button id="btn-right" class="bg-emerald-500 text-white px-6 py-2 rounded-xl font-black text-lg shadow cute-button">▶</button>
                 </div>
@@ -509,11 +511,11 @@
 
         /* FRIENDS DATA */
         const friendsData = [
-            { id: 'megumi', name: '芽ぐみちゃん', desc: '新芽の妖精。生姜の育ちを見守るお友達。', color: '#a5d6a7', avatar: '🌱' },
-            { id: 'hana', name: 'はなちゃん', desc: 'お花が大好きでおしゃれな可愛いお友達。', color: '#f8bbd0', avatar: '🌸' },
-            { id: 'honey', name: 'ハニーちゃん', desc: 'はちみつが大好きでいつも甘い香りがするよ。', color: '#ffe082', avatar: '🐝' },
-            { id: 'jiiji', name: 'じいじ', desc: '親生姜のじいじ。生姜の知識がとっても豊富！', color: '#bcaaa4', avatar: '👴' },
-            { id: 'baaba', name: 'ばあば', desc: '親生姜のばあば。美味しい生姜料理を作ってくれる。', color: '#d7ccc8', avatar: '👵' }
+            { id: 'megumi', name: '芽ぐみちゃん', desc: '新芽の妖精。生姜の育ちを見守るお友達。', color: '#a5d6a7', avatar: '🌱', eventType: 'general' },
+            { id: 'hana', name: 'はなちゃん', desc: 'お花が大好きでおしゃれな可愛いお友達。', color: '#f8bbd0', avatar: '🌸', eventType: 'general' },
+            { id: 'honey', name: 'ハニーちゃん', desc: 'はちみつが大好きでいつも甘い香りがするよ。', color: '#ffe082', avatar: '🐝', eventType: 'general' },
+            { id: 'jiiji', name: 'じいじ', desc: '親生姜のじいじ。生姜の知識がとっても豊富！', color: '#bcaaa4', avatar: '👴', eventType: 'jiiji' },
+            { id: 'baaba', name: 'ばあば', desc: '親生姜のばあば。美味しい生姜料理を作ってくれる。', color: '#d7ccc8', avatar: '👵', eventType: 'baaba' }
         ];
 
         /* DIALOGUES */
@@ -652,14 +654,51 @@
 
             gameScore = 0;
             gameTimeLeft = 15;
-            playerX = 120;
+            playerX = 140;
             fallingItems = [];
 
             document.getElementById('game-score').innerText = gameScore;
             document.getElementById('game-timer').innerText = gameTimeLeft;
 
-            document.getElementById('btn-left').onclick = () => playerX = Math.max(20, playerX - 25);
-            document.getElementById('btn-right').onclick = () => playerX = Math.min(240, playerX + 25);
+            // Touch & Mouse Drag Controls for smooth movement
+            function updatePlayerPositionFromPointer(clientX) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const canvasX = (clientX - rect.left) * scaleX;
+                playerX = Math.max(20, Math.min(260, canvasX));
+            }
+
+            let isDragging = false;
+
+            canvas.onmousedown = (e) => {
+                isDragging = true;
+                updatePlayerPositionFromPointer(e.clientX);
+            };
+            window.onmousemove = (e) => {
+                if (isDragging) {
+                    updatePlayerPositionFromPointer(e.clientX);
+                }
+            };
+            window.onmouseup = () => {
+                isDragging = false;
+            };
+
+            // Touch events for mobile/tablet
+            canvas.ontouchstart = (e) => {
+                if (e.touches.length > 0) {
+                    updatePlayerPositionFromPointer(e.touches[0].clientX);
+                }
+            };
+            canvas.ontouchmove = (e) => {
+                if (e.touches.length > 0) {
+                    updatePlayerPositionFromPointer(e.touches[0].clientX);
+                    e.preventDefault(); // prevent scrolling while playing
+                }
+            };
+
+            // Button controls fallback
+            document.getElementById('btn-left').onclick = () => playerX = Math.max(20, playerX - 30);
+            document.getElementById('btn-right').onclick = () => playerX = Math.min(260, playerX + 30);
 
             if (spawnerInterval) clearInterval(spawnerInterval);
             if (timerInterval) clearInterval(timerInterval);
@@ -735,6 +774,8 @@
         }
 
         function endMiniGame() {
+            window.onmousemove = null;
+            window.onmouseup = null;
             if (gameInterval) clearInterval(gameInterval);
             if (spawnerInterval) clearInterval(spawnerInterval);
             if (timerInterval) clearInterval(timerInterval);
@@ -864,7 +905,7 @@
                         <div class="font-black text-xs text-amber-950">${friend.name}</div>
                         <div class="text-[10px] text-gray-500">${friend.desc}</div>
                     </div>
-                    <button onclick="inviteFriend('${friend.name}', '${friend.avatar}')" class="bg-orange-400 text-white text-xs font-black px-2.5 py-1 rounded-xl shadow cute-button hover:bg-orange-500">
+                    <button onclick="inviteFriend('${friend.id}')" class="bg-orange-400 text-white text-xs font-black px-2.5 py-1 rounded-xl shadow cute-button hover:bg-orange-500">
                         呼ぶ
                     </button>
                 `;
@@ -872,45 +913,80 @@
             });
         }
 
-        function inviteFriend(name, avatar) {
+        function inviteFriend(friendId) {
             closeModal('zukan-modal');
-            spawnVisitor(name, avatar);
-            document.getElementById('speech-text').innerText = `${name}が遊びに来てくれたよ！`;
+            const f = friendsData.find(item => item.id === friendId);
+            if (f) {
+                spawnVisitor(f);
+            }
         }
 
-        function spawnVisitor(name, avatar) {
+        function spawnVisitor(friend) {
             const visitor = document.getElementById('visitor-container');
             const char = document.getElementById('visitor-character');
-            char.innerHTML = avatar;
+            char.innerHTML = friend.avatar;
             
-            document.getElementById('visitor-bubble').innerText = `${name}が来たよ！`;
+            // Store current visitor event type on container dataset
+            visitor.dataset.friendId = friend.id;
+            visitor.dataset.friendName = friend.name;
+
+            document.getElementById('visitor-bubble').innerText = `${friend.name}が来たよ！`;
 
             visitor.classList.remove('translate-y-12', 'opacity-0');
             visitor.classList.add('translate-y-0', 'opacity-100');
 
+            if (friend.id === 'baaba') {
+                document.getElementById('speech-text').innerText = "ばあばが遊びに来たよ！一緒にクッキーを作ろ〜🍪";
+            } else if (friend.id === 'jiiji') {
+                document.getElementById('speech-text').innerText = "じいじが遊びに来たよ！トランプで勝負だ〜🎴";
+            } else {
+                document.getElementById('speech-text').innerText = `${friend.name}が遊びに来てくれたよ！`;
+            }
+
             setTimeout(() => {
                 visitor.classList.remove('translate-y-0', 'opacity-100');
                 visitor.classList.add('translate-y-12', 'opacity-0');
-            }, 10000);
+            }, 12000);
         }
 
         function interactVisitor() {
-            gameState.coins += 50;
-            gameState.happy = Math.min(100, gameState.happy + 15);
-            renderUI();
-            showParticle('🪙 +50');
-            document.getElementById('speech-text').innerText = "お友達とおしゃべりしてプレゼントをもらったよ！";
+            const visitor = document.getElementById('visitor-container');
+            const fId = visitor.dataset.friendId;
+            const fName = visitor.dataset.friendName;
+
+            if (fId === 'baaba') {
+                gameState.inventory.ginger_cookie = (gameState.inventory.ginger_cookie || 0) + 3;
+                gameState.happy = Math.min(100, gameState.happy + 20);
+                renderUI();
+                showParticle('🍪 クッキー+3!');
+                document.getElementById('speech-text').innerText = `ばあばと一緒に生姜クッキーをたくさん作ったよ！✨`;
+            } else if (fId === 'jiiji') {
+                gameState.coins += 80;
+                gameState.love = Math.min(100, gameState.love + 20);
+                renderUI();
+                showParticle('🎴 🪙 +80');
+                document.getElementById('speech-text').innerText = `じいじとトランプで遊んで楽しかったな〜♪`;
+            } else {
+                gameState.coins += 50;
+                gameState.happy = Math.min(100, gameState.happy + 15);
+                renderUI();
+                showParticle('🪙 +50');
+                document.getElementById('speech-text').innerText = `${fName}とおしゃべりしてプレゼントをもらったよ！`;
+            }
+
+            visitor.classList.remove('translate-y-0', 'opacity-100');
+            visitor.classList.add('translate-y-12', 'opacity-0');
         }
 
         function randomVisitorEvent() {
             if (Math.random() < 0.45) {
                 const f = friendsData[Math.floor(Math.random() * friendsData.length)];
-                spawnVisitor(f.name, f.avatar);
+                spawnVisitor(f);
             }
         }
 
-        /* SHOP MENU */
-        let currentShopTab = 'food';
+     /* SHOP MENU */
+     let currentShopTab = 'food';
         function switchShopTab(tab) {
             currentShopTab = tab;
             document.getElementById('tab-food').className = tab === 'food' ? 'flex-1 py-1.5 font-black text-xs text-amber-950 border-b-2 border-amber-500' : 'flex-1 py-1.5 font-black text-xs text-gray-400';
@@ -1013,4 +1089,3 @@
     </script>
 </body>
 </html>
-
